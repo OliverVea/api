@@ -5,14 +5,14 @@ import requests
 import urllib3
 urllib3.disable_warnings()
 
-from models.ecs_auth_config import ECSAuthConfig
+from api.ecommercesearch.auth_config import AuthConfiguration
 
 class EcommerceSearch:
-    def __init__(self, host: str, config: ECSAuthConfig):
+    def __init__(self, host: str, config: AuthConfiguration):
         self.host = host
         self.token = self._get_bearer_token(config)
     
-    def _get_bearer_token(self, config: ECSAuthConfig) -> str:
+    def _get_bearer_token(self, config: AuthConfiguration) -> str:
         url = f'{config.auth}/connect/token'
 
         authorization = base64.b64encode(bytes(config.clientId + ":" + config.clientSecret, "ISO-8859-1")).decode("ascii")

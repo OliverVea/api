@@ -5,7 +5,7 @@ import requests
 import urllib3
 urllib3.disable_warnings()
 
-from models.chatgpt_response import ChatGPTResponse
+from api.chatgpt.response import ChatGPTResponse
 
 class ChatGPT:
     def __init__(self, max_tokens: int = 2000, temperature: float = 0.5):

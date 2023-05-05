@@ -1,7 +1,7 @@
 import dataclasses
 
 @dataclasses.dataclass
-class ECSAuthConfig:
+class AuthConfiguration:
     clientId: str
     clientSecret: str
     auth: str

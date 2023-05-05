@@ -4,8 +4,8 @@ import json
 import urlpath
 import base64
 
-from models.elasticsearch_configuration import ElasticsearchConfiguration
-from models.elasticsearch_response import ElasticsearchResponse
+from api.elasticsearch.config import ElasticsearchConfiguration
+from api.elasticsearch.response import ElasticsearchResponse
 
 class Elasticsearch:
     def __init__(self, config: ElasticsearchConfiguration, verify: bool = False):
