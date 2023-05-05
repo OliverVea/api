@@ -1,38 +1,11 @@
-import dataclasses
-import json
 from typing import Any
 
+import json
 import urlpath
 import base64
 
-
-@dataclasses.dataclass
-class ElasticsearchConfiguration:
-    base_url: urlpath.URL = urlpath.URL('https://localhost:9200')
-    username: str = 'elastic'
-    password: str = 'ELASTIC_PASSWORD'
-
-@dataclasses.dataclass
-class ElasticsearchResponse:
-    config: ElasticsearchConfiguration
-    url: urlpath.URL
-    response: urlpath.requests.Response | None = None
-    content: str | None = None
-    json: Any | None = None
-    exception: Exception | None = None
-
-    def succeeded(self):
-        if self.exception != None:
-            return False
-        
-        if self.response == None:
-            return True
-        
-        if self.response.status_code < 200 or self.response.status_code > 299:
-            return False
-        
-        return True
-
+from models.elasticsearch_configuration import ElasticsearchConfiguration
+from models.elasticsearch_response import ElasticsearchResponse
 
 class Elasticsearch:
     def __init__(self, config: ElasticsearchConfiguration, verify: bool = False):
@@ -49,7 +22,7 @@ class Elasticsearch:
         return headers
 
     def _get_token(self):
-        token_content = f'{config.username}:{config.password}'
+        token_content = f'{self.config.username}:{self.config.password}'
         token_content_bytes = token_content.encode('utf-8')
         token = base64.b64encode(token_content_bytes)
         return token.decode('ascii')
@@ -76,19 +49,8 @@ class Elasticsearch:
 
         except Exception as exception:
             print(f'Got exception:\n{exception}')
-            return ElasticsearchResponse(config, url, exception=exception)
+            return ElasticsearchResponse(self.config, url, exception=exception)
 
         content, content_json = self._get_content(response)
 
-        return ElasticsearchResponse(config, url, response=response, content=content, json=content_json)
-
-
-if __name__ == '__main__':
-    config = ElasticsearchConfiguration()
-    api = Elasticsearch(config)
-
-    response = api.get('_cat/indices')
-
-    assert response.succeeded()
-    assert response.json != None
-    assert type(response.json) == list
+        return ElasticsearchResponse(self.config, url, response=response, content=content, json=content_json)

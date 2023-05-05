@@ -1,23 +1,18 @@
 import base64
-import dataclasses
 import json
 import requests
 
 import urllib3
 urllib3.disable_warnings()
 
-@dataclasses.dataclass
-class AuthorizationConfiguration:
-    clientId: str
-    clientSecret: str
-    auth: str
+from models.ecs_auth_config import ECSAuthConfig
 
 class EcommerceSearch:
-    def __init__(self, host: str, config: AuthorizationConfiguration):
+    def __init__(self, host: str, config: ECSAuthConfig):
         self.host = host
         self.token = self._get_bearer_token(config)
     
-    def _get_bearer_token(self, config: AuthorizationConfiguration) -> str:
+    def _get_bearer_token(self, config: ECSAuthConfig) -> str:
         url = f'{config.auth}/connect/token'
 
         authorization = base64.b64encode(bytes(config.clientId + ":" + config.clientSecret, "ISO-8859-1")).decode("ascii")

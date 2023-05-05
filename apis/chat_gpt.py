@@ -1,4 +1,3 @@
-import dataclasses
 import json
 import os
 import requests
@@ -6,11 +5,7 @@ import requests
 import urllib3
 urllib3.disable_warnings()
 
-@dataclasses.dataclass
-class ChatGPTResponse:
-    prompt: str
-    response: str
-    full_response: dict
+from models.chatgpt_response import ChatGPTResponse
 
 class ChatGPT:
     def __init__(self, max_tokens: int = 2000, temperature: float = 0.5):
