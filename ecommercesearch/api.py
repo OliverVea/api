@@ -44,6 +44,9 @@ class EcommerceSearch:
 
         return headers
     
+    def _print_response_error(self, response: requests.Response):
+            print(f'Could not decode JSON got ({response.status_code}) when accessing ({response.request.url}) with method ({response.request.method}):\n{response.content.decode("utf-8")}')
+    
     def post(self, endpoint: str, data, params: dict[str,str] = {}, additional_headers: dict[str, str] = {}):
         url = self._get_url(endpoint)
         headers = self._get_headers(additional_headers)
@@ -53,6 +56,7 @@ class EcommerceSearch:
         try:
             return response.json()
         except json.JSONDecodeError:
+            self._print_response_error(response)
             return None
     
     def get(self, endpoint: str, params: dict[str, str] = {}, additional_headers: dict[str, str] = {}):
@@ -64,5 +68,5 @@ class EcommerceSearch:
         try:
             return response.json()
         except json.JSONDecodeError:
-            print(f'Could not decode JSON got ({response.status_code}):\n{response.content.decode("utf-8")}')
+            self._print_response_error(response)
             return None
