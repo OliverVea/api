@@ -3,7 +3,7 @@ import urlpath
 
 from typing import Any
 
-from api.elasticsearch.response import ElasticsearchConfiguration
+from api.elasticsearch.config import ElasticsearchConfiguration
 
 @dataclasses.dataclass
 class ElasticsearchResponse:
