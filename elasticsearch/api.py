@@ -1,34 +1,36 @@
-from typing import Any
+from typing import Any, Callable
 
 import json
 import urlpath
-import base64
 
+from api._common.api import Api
 from api.elasticsearch.config import ElasticsearchConfiguration
-from api.elasticsearch.response import ElasticsearchResponse
+from api._common.response import Response
+from api.headers.header import Headers, accept_json, basic_authorization
 
-class Elasticsearch:
-    def __init__(self, config: ElasticsearchConfiguration, verify: bool = False):
+class ElasticResponse(Response):
+    config: ElasticsearchConfiguration | None = None
+
+    def __init__(self, response: Response, config: ElasticsearchConfiguration):
+        for name, value in response.to_dict().items():
+            self.__setattr__(name, value)
+
         self.config = config
-        self.verify = verify
-        self.headers = {'Accept': 'application/json'}
 
-    def _get_headers(self, extra_headers: dict[str, str] | None) -> dict[str, str]:
-        headers = {'Authorization': f'Basic {self._get_token()}'}
+class Elasticsearch(Api):
+    def __init__(self, config: ElasticsearchConfiguration, verify: bool = False):
+        super().__init__(config.base_url, verify, accept_json())
+        self.config = config
+    
+    def _get_response(self, url: urlpath.URL, request: Callable):
+        response = exception = content = content_json = None
 
-        headers.update(self.headers)
-        if extra_headers: headers.update(extra_headers)
+        try:
+            response: urlpath.requests.Response = request()
 
-        return headers
-
-    def _get_token(self):
-        token_content = f'{self.config.username}:{self.config.password}'
-        token_content_bytes = token_content.encode('utf-8')
-        token = base64.b64encode(token_content_bytes)
-        return token.decode('ascii')
-
-    def _get_content(self, response: urlpath.requests.Response) -> tuple[str | None , Any | None]:
-        content = content_json = None
+        except Exception as e:
+            exception = e
+            print(f'Got exception:\n{exception}')
 
         try:
             content = response.content.decode('utf-8')
@@ -37,20 +39,21 @@ class Elasticsearch:
         except Exception:
             pass
 
-        return content, content_json
+        return ElasticResponse(
+            response=Response(url, response=response, content=content, json=content_json, exception=exception),
+            config=self.config)
 
-    def get(self, path: str, params: Any | None = None, headers: Any | None = None) -> ElasticsearchResponse:
-        url = self.config.base_url / path
+    def _get_authorization_headers(self) -> dict[str, str] | Headers | None:
+        return basic_authorization(self.config.username, self.config.password)
 
-        headers = self._get_headers(headers)
+    def get(self, 
+            path: str, 
+            params: Any | None = None, 
+            headers: dict[str, str] | Headers | None = None) -> ElasticResponse:
+        
+        url = self.base_url / path
 
-        try:
-            response = url.get(params=params, verify=self.verify, headers=headers)
+        headers = self._get_headers(headers).to_dict()
 
-        except Exception as exception:
-            print(f'Got exception:\n{exception}')
-            return ElasticsearchResponse(self.config, url, exception=exception)
-
-        content, content_json = self._get_content(response)
-
-        return ElasticsearchResponse(self.config, url, response=response, content=content, json=content_json)
+        request = lambda: url.get(params=params, verify=self.verify, headers=headers)
+        return self._get_response(url, request)

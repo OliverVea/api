@@ -1,0 +1,47 @@
+from api.jira.api import Jira, JiraSearchResponseIssue
+
+
+def list_to_jql(l: list[str]) -> str:
+    content = [f'"{e}"' for e in l]
+    return f'({", ".join(content)})'
+
+def get_jql(
+        issue_keys: list[str] | None = None,
+        projects: list[str] | None = None, 
+        types: list[str] | None = None, 
+        statuses: list[str] | None = None, 
+        require_story_points: bool = False):
+    
+    parts = []
+
+    part_lookup = {
+        'key': issue_keys, 
+        'project': projects, 
+        'type': types, 
+        'status': statuses}
+    
+    for key, value in part_lookup.items():
+        if value:
+            parts.append(f'{key} in {list_to_jql(value)}')
+    
+    if require_story_points:
+        parts.append('"Story Points[Number]" > 0')
+
+    return ' & '.join(parts)
+
+def get_all_issues(api: Jira, jql: str, fields: list[str]) -> list[JiraSearchResponseIssue]:
+    issues: list[JiraSearchResponseIssue] = []
+
+    start = 0
+    total = 1
+
+    while start < total:
+        response = api.search(jql, fields, start=start)
+        
+        issues += response.issues
+
+        start = response.start + response.max_results
+        total = response.total
+
+    return issues
+

@@ -1,3 +1,2 @@
-from api.elasticsearch.api import Elasticsearch
+from api.elasticsearch.api import Elasticsearch, ElasticResponse
 from api.elasticsearch.config import ElasticsearchConfiguration
-from api.elasticsearch.response import ElasticsearchResponse

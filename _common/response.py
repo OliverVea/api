@@ -3,11 +3,8 @@ import urlpath
 
 from typing import Any
 
-from api.elasticsearch.config import ElasticsearchConfiguration
-
 @dataclasses.dataclass
-class ElasticsearchResponse:
-    config: ElasticsearchConfiguration
+class Response:
     url: urlpath.URL
     response: urlpath.requests.Response | None = None
     content: str | None = None
@@ -25,3 +22,6 @@ class ElasticsearchResponse:
             return False
         
         return True
+    
+    def to_dict(self) -> dict:
+        return dataclasses.asdict(self)

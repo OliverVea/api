@@ -1,0 +1,2 @@
+class InvalidHeaderTypeError(TypeError):
+    pass
