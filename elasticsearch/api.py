@@ -57,3 +57,12 @@ class Elasticsearch(Api):
 
         request = lambda: url.get(params=params, verify=self.verify, headers=headers)
         return self._get_response(url, request)
+    
+    def post(self, path: str, data, params: Any | None = None, headers: dict[str, str] | Headers | None = None) -> Response:
+        return super().post(path, data, params, headers)
+    
+    def put(self, path: str, data, params: Any | None = None, headers: dict[str, str] | Headers | None = None) -> Response:
+        return super().put(path, data, params, headers)
+    
+    def delete(self, path: str, params: Any | None = None, headers: dict[str, str] | Headers | None = None) -> Response:
+        return super().delete(path, params, headers)
