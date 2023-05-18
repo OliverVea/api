@@ -29,7 +29,7 @@ def get_jql(
 
     return ' & '.join(parts)
 
-def get_all_issues(api: Jira, jql: str, fields: list[str]) -> list[JiraSearchResponseIssue]:
+def get_all_issues(api: Jira, jql: str, fields: list[str], field_mappings: tuple[str, str] = [('customfield_10215', 'estimate')]) -> list[JiraSearchResponseIssue]:
     issues: list[JiraSearchResponseIssue] = []
 
     start = 0
@@ -42,6 +42,12 @@ def get_all_issues(api: Jira, jql: str, fields: list[str]) -> list[JiraSearchRes
 
         start = response.start + response.max_results
         total = response.total
+        
+    for issue in issues:
+        for mapping_from, mapping_to in field_mappings: 
+            if mapping_from in issue.fields:
+                issue.fields[mapping_to] = issue.fields[mapping_from]
+                del issue.fields[mapping_from]
 
     return issues
 
