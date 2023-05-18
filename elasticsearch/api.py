@@ -44,6 +44,9 @@ class Elasticsearch(Api):
             config=self.config)
 
     def _get_authorization_headers(self) -> dict[str, str] | Headers | None:
+        if not self.config.username or not self.config.password:
+            return None
+        
         return basic_authorization(self.config.username, self.config.password)
 
     def get(self, 
