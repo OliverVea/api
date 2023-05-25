@@ -1,0 +1,4 @@
+
+class InvalidHostTypeError(ValueError):
+    pass
+
